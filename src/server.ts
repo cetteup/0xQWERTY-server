@@ -12,7 +12,7 @@ const io = new socketio.Server(server);
 app.use(express.json());
 app.use(express.urlencoded());
 
-app.post('/hook', (req, res) => {
+app.post('/webhooks/eventsub-callback', (req, res) => {
     console.log(req.body);
 
     if (req.body?.event) {
