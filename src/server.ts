@@ -16,7 +16,8 @@ app.post('/webhooks/eventsub-callback', (req, res) => {
     console.log(req.body);
 
     if (req.body?.event) {
-        io.to(`streamer:${req.body.event.broadcaster_user_login}`).emit('redemption', { id: req.body.event.id, reward_id: req.body.event.reward.id });
+        const redemption = { id: req.body.event.id, reward_id: req.body.event.reward.id, reward_title: req.body.event.reward.title };
+        io.to(`streamer:${req.body.event.broadcaster_user_login}`).emit('redemption', redemption);
     }
 
     res.send(req.body.challenge);
