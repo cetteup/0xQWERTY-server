@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "Server for Twitch viewer keyboard",
   "main": "dist/server.js",
+  "engines": {
+    "node": "14.x"
+  },
   "scripts": {
-    "prebuild": "eslint \"src/**\" --fix",
+    "prebuild": "npx eslint \"src/**\" --fix",
     "build": "tsc",
     "prestart": "npm run build",
     "start": "node .",
