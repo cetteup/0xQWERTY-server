@@ -7,9 +7,12 @@
     "node": "14.x"
   },
   "scripts": {
-    "build": "tsc",
-    "prestart": "npm run build",
-    "start": "node .",
+    "build-ts": "tsc",
+    "postinstall": "npm run build-ts",
+    "start": "npm run serve",
+    "serve": "node dist/server.js",
+    "watch-node": "nodemon dist/server.js",
+    "watch-ts": "tsc -w",
     "test": "npx eslint \"src/**\" --fix"
   },
   "repository": {
