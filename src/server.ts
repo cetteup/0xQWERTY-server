@@ -16,15 +16,26 @@ app.post('/webhooks/eventsub-callback', (req, res) => {
     console.log(req.body);
 
     if (req.body?.event) {
-        const redemption = { id: req.body.event.id, reward_id: req.body.event.reward.id, reward_title: req.body.event.reward.title };
+        const redemption = {
+            id: req.body.event.id,
+            broadcaster: req.body.event.broadcaster_user_login,
+            reward_id: req.body.event.reward.id,
+            reward_title: req.body.event.reward.title,
+            redeemed_by: req.body.event.user_name
+        };
         io.to(`streamer:${req.body.event.broadcaster_user_login}`).emit('redemption', redemption);
     }
 
     res.send(req.body.challenge);
 });
 
+// TODO: Add POST endpoint to add new EventSub subscription
+
+// TODO: Add async function to retrieve manageable 
+
 io.on('connect', (socket: socketio.Socket) => {
     console.log('Socket connected');
+
     socket.on('join', (room) => {
         socket.join(room);
         socket.send(`You joined ${room}`);
