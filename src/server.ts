@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as  http from 'http';
 import * as socketio from 'socket.io';
 import * as boom from '@hapi/boom';
-import { verifyEventSubSignature } from './utilites';
+import { verifyEventSubSignature } from './utilities';
 
 const port = Number(process.env.PORT || 3000);
 
