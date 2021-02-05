@@ -6,14 +6,14 @@ import { verifyEventSubSignature } from './utilites';
 
 const port = Number(process.env.PORT || 3000);
 
-const app = express();
+const app = express.default();
 
 const server = http.createServer(app);
 const io = new socketio.Server(server);
 
 const twitchBodyParser = express.json({ verify: verifyEventSubSignature });
 
-app.post('/webhooks/eventsub-callback', twitchBodyParser, (req, res) => {
+app.post('/webhooks/eventsub-callback', twitchBodyParser, (req: express.Request, res: express.Response) => {
     console.log(req.body);
 
     if (req.body?.event) {

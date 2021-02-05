@@ -2,7 +2,7 @@ import * as socketio from 'socket.io-client';
 import * as tmi from 'tmi.js';
 
 console.log('Connecting to socket.io server', process.env.SOCKETIO_SERVER_ADDR);
-const io = socketio(process.env.SOCKETIO_SERVER_ADDR);
+const io = socketio.default(process.env.SOCKETIO_SERVER_ADDR);
 
 const chatbotChannels = process.env.CHATBOT_CHANNELS.split(' ');
 
