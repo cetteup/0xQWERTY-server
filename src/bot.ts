@@ -30,7 +30,7 @@ interface redemption {
     reward_id: string;
     reward_title: string;
     redeemed_by: string;
-};
+}
 
 io.on('redemption', (data: redemption) => {
     console.log('redemption', data);
@@ -43,4 +43,4 @@ io.on('redemption', (data: redemption) => {
 
 io.on('message', (msg: string) => {
     console.log('message: ' + msg);
-})
+});
