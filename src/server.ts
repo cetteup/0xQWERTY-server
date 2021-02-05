@@ -1,6 +1,8 @@
 import * as express from 'express';
 import * as  http from 'http';
 import * as socketio from 'socket.io';
+import * as boom from '@hapi/boom';
+import { verifyEventSubSignature } from './utilites';
 
 const port = Number(process.env.PORT || 3000);
 
@@ -9,10 +11,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new socketio.Server(server);
 
-app.use(express.json());
-app.use(express.urlencoded());
+const twitchBodyParser = express.json({ verify: verifyEventSubSignature });
 
-app.post('/webhooks/eventsub-callback', (req, res) => {
+app.post('/webhooks/eventsub-callback', twitchBodyParser, (req, res) => {
     console.log(req.body);
 
     if (req.body?.event) {
@@ -27,6 +28,14 @@ app.post('/webhooks/eventsub-callback', (req, res) => {
     }
 
     res.send(req.body.challenge);
+});
+
+app.use((err: boom.Boom, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // Boomify error if not a boom error
+    if (!boom.isBoom(err)) {
+        err = boom.boomify(err);
+    }
+    res.status(err.output.statusCode).send({ errors: err?.data?.errors ? err.data.errors : [err.output.payload.message] });
 });
 
 // TODO: Add POST endpoint to add new EventSub subscription
