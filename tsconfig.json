@@ -12,9 +12,5 @@
         "src/server.ts",
         "src/utilities.ts",
         "modules.d.ts"
-    ],
-    "exclude": [
-        "dist",
-        "node_modules"
     ]
 }

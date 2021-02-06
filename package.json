@@ -7,7 +7,7 @@
     "node": "14.x"
   },
   "scripts": {
-    "build-ts": "tsc",
+    "build-ts": "tsc -b",
     "postinstall": "npm run build-ts",
     "start": "npm run serve",
     "serve": "node dist/server.js",
