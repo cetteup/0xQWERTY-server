@@ -1,17 +1,18 @@
 import * as socketio from 'socket.io-client';
 import * as tmi from 'tmi.js';
+import { appConfig } from './config';
 
-console.log('Connecting to socket.io server', process.env.SOCKETIO_SERVER_ADDR);
-const io = socketio.default(process.env.SOCKETIO_SERVER_ADDR);
+console.log('Connecting to socket.io server', appConfig.SOCKETIO_SERVER_ADDR);
+const io = socketio.default(appConfig.SOCKETIO_SERVER_ADDR);
 
-const chatbotChannels = process.env.CHATBOT_CHANNELS.split(' ');
+const chatbotChannels = appConfig.CHATBOT_CHANNELS.split(' ');
 
 const client = new tmi.Client({
     options: { debug: true },
     connection: { reconnect: true },
     identity: {
         username: '0xqwerty',
-        password: `oauth:${process.env.CHATBOT_OAUTH_TOKEN}`
+        password: `oauth:${appConfig.CHATBOT_OAUTH_TOKEN}`
     },
     channels: chatbotChannels.slice()
 });
@@ -24,7 +25,7 @@ for (const channel of chatbotChannels) {
     io.emit('join', `streamer:${channel}`);
 }
 
-interface redemption {
+interface Redemption {
     id: string;
     broadcaster: string;
     reward_id: string;
@@ -32,7 +33,7 @@ interface redemption {
     redeemed_by: string;
 }
 
-io.on('redemption', (data: redemption) => {
+io.on('redemption', (data: Redemption) => {
     console.log('redemption', data);
 
     // If channel is a bot "client", announce redemption

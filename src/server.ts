@@ -2,9 +2,9 @@ import * as express from 'express';
 import * as  http from 'http';
 import * as socketio from 'socket.io';
 import * as boom from '@hapi/boom';
-import { verifyEventSubSignature } from './utilities';
-
-const port = Number(process.env.PORT || 3000);
+import * as axios from 'axios';
+import { verifyEventSubSignature, setupEventsubSubscriptions } from './utilities';
+import { appConfig } from './config';
 
 const app = express.default();
 
@@ -12,6 +12,32 @@ const server = http.createServer(app);
 const io = new socketio.Server(server);
 
 const twitchBodyParser = express.json({ verify: verifyEventSubSignature });
+
+const aclient = axios.default.create({
+    timeout: 2000,
+    headers: {
+        'Client-Id': appConfig.CLIENT_ID,
+        'Authorization': `Bearer ${appConfig.APP_ACCESS_TOKEN}`
+    }
+});
+
+app.post('/client/eventsub-setup', express.json(), async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (!req.body?.broadcaster_id || !Array.isArray(req.body?.reward_ids)) {
+        const err = boom.badData('Missing required parameters or invalid parameters');
+        next(err);
+    }
+    else {
+        try {
+            await setupEventsubSubscriptions(aclient, req.body.broadcaster_id, req.body.reward_ids);
+            res.status(200).json({ message: 'Eventsub subscriptions are all set up' });
+        }
+        catch (e) {
+            console.log(e);
+            const err = boom.badImplementation('Failed to set up eventsub subscriptions');
+            next(err);
+        }
+    }
+});
 
 app.post('/webhooks/eventsub-callback', twitchBodyParser, (req: express.Request, res: express.Response) => {
     console.log(req.body);
@@ -38,8 +64,6 @@ app.use((err: boom.Boom, req: express.Request, res: express.Response, next: expr
     res.status(err.output.statusCode).send({ errors: err?.data?.errors ? err.data.errors : [err.output.payload.message] });
 });
 
-// TODO: Add POST endpoint to add new EventSub subscription
-
 // TODO: Add async function to retrieve manageable 
 
 io.on('connect', (socket: socketio.Socket) => {
@@ -51,6 +75,6 @@ io.on('connect', (socket: socketio.Socket) => {
     });
 });
 
-server.listen(port, () => {
-    console.log(`Socket.IO server running at http://localhost:${port}/`);
+server.listen(appConfig.LISTEN_PORT, () => {
+    console.log(`Socket.IO server running at http://localhost:${appConfig.LISTEN_PORT}/`);
 });
