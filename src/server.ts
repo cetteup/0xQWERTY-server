@@ -13,6 +13,8 @@ const io = new socketio.Server(server);
 
 const twitchBodyParser = express.json({ verify: verifyEventSubSignature });
 
+const observedTwitchEventsubIds: Array<string> = [];
+
 const aclient = axios.default.create({
     timeout: 2000,
     headers: {
@@ -40,9 +42,8 @@ app.post('/client/eventsub-setup', express.json(), async (req: express.Request, 
 });
 
 app.post('/webhooks/eventsub-callback', twitchBodyParser, (req: express.Request, res: express.Response) => {
-    console.log(req.body);
-
-    if (req.body?.event) {
+    const messageId = String(req.headers['twitch-eventsub-message-id']);
+    if (req.body?.event && !observedTwitchEventsubIds.includes(messageId)) {
         const redemption = {
             id: req.body.event.id,
             broadcaster: req.body.event.broadcaster_user_login,
@@ -51,6 +52,7 @@ app.post('/webhooks/eventsub-callback', twitchBodyParser, (req: express.Request,
             redeemed_by: req.body.event.user_name
         };
         io.to(`streamer:${req.body.event.broadcaster_user_login}`).emit('redemption', redemption);
+        observedTwitchEventsubIds.push(messageId);
     }
 
     res.send(req.body.challenge);
