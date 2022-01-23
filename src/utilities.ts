@@ -1,8 +1,9 @@
-import * as express from 'express';
 import * as boom from '@hapi/boom';
 import * as axios from 'axios';
 import * as crypto from 'crypto';
+import * as express from 'express';
 import Config from './config';
+import { logger } from './logger';
 
 const verifyEventSubSignature = (req: express.Request, res: express.Response, buf: Buffer, encoding: BufferEncoding) => {
     // Deconstruct signature header into algorith and signature
@@ -20,7 +21,7 @@ const verifyEventSubSignature = (req: express.Request, res: express.Response, bu
 
     // Compare calculated hash to signature from header
     if (hash !== signature) {
-        console.log('Request signatur is invalid');
+        logger.error('Request signatur is invalid');
         const err = boom.badRequest('Request signature is invalid');
         throw err;
     }

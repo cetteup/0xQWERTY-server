@@ -29,9 +29,11 @@
     "@hapi/boom": "^9.1.1",
     "axios": "^0.21.1",
     "express": "^4.17.1",
+    "nanoid": "^3.2.0",
     "socket.io": "^3.1.0",
     "socket.io-client": "^3.1.1",
-    "tmi.js": "^1.7.1"
+    "tmi.js": "^1.7.1",
+    "tslog": "^3.3.1"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

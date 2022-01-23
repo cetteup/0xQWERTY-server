@@ -1,10 +1,12 @@
-import * as express from 'express';
-import * as  http from 'http';
-import * as socketio from 'socket.io';
 import * as boom from '@hapi/boom';
 import * as axios from 'axios';
-import { verifyEventSubSignature, setupEventsubSubscriptions } from './utilities';
+import * as express from 'express';
+import * as http from 'http';
+import { customAlphabet } from 'nanoid';
+import * as socketio from 'socket.io';
 import Config from './config';
+import { asyncLocalStorage, logger } from './logger';
+import { setupEventsubSubscriptions, verifyEventSubSignature } from './utilities';
 
 const app = express.default();
 
@@ -23,6 +25,14 @@ const aclient = axios.default.create({
     }
 });
 
+// Set up request-based error logging
+app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const requestId: string = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 6)();
+    await asyncLocalStorage.run({ requestId },  async () => {
+        return next();
+    });
+});
+
 app.post('/client/eventsub-setup', express.json(), async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (!req.body?.broadcaster_id || !Array.isArray(req.body?.reward_ids)) {
         const err = boom.badData('Missing required parameters or invalid parameters');
@@ -33,8 +43,8 @@ app.post('/client/eventsub-setup', express.json(), async (req: express.Request, 
             await setupEventsubSubscriptions(aclient, req.body.broadcaster_id, req.body.reward_ids);
             res.status(200).json({ message: 'Eventsub subscriptions are all set up' });
         }
-        catch (e) {
-            console.log(e);
+        catch (e: any) {
+            logger.error('Failed to set up eventsub subscriptions', e.message);
             const err = boom.badImplementation('Failed to set up eventsub subscriptions');
             next(err);
         }
@@ -69,7 +79,7 @@ app.use((err: boom.Boom, req: express.Request, res: express.Response, next: expr
 // TODO: Add async function to retrieve manageable 
 
 io.on('connect', (socket: socketio.Socket) => {
-    console.log('Socket connected');
+    logger.info('Socket connected');
 
     socket.on('join', (room) => {
         socket.join(room);
@@ -78,5 +88,5 @@ io.on('connect', (socket: socketio.Socket) => {
 });
 
 server.listen(Config.LISTEN_PORT, () => {
-    console.log(`Socket.IO server running at http://localhost:${Config.LISTEN_PORT}/`);
+    logger.info(`Socket.IO/Express server running at http://localhost:${Config.LISTEN_PORT}/`);
 });

@@ -1,8 +1,9 @@
 import * as socketio from 'socket.io-client';
 import * as tmi from 'tmi.js';
 import Config from './config';
+import { logger } from './logger';
 
-console.log('Connecting to socket.io server', Config.SOCKETIO_SERVER_ADDR);
+logger.info('Connecting to socket.io server:', Config.SOCKETIO_SERVER_ADDR);
 const io = socketio.default(Config.SOCKETIO_SERVER_ADDR);
 
 const chatbotChannels = Config.CHATBOT_CHANNELS.split(' ');
@@ -21,7 +22,7 @@ client.connect();
 
 // Join all channels we are supposed to annouce redemptions on
 for (const channel of chatbotChannels) {
-    console.log(`Joining ${channel}`);
+    logger.info(`Joining Twitch chat of channel:`, channel);
     io.emit('join', `streamer:${channel}`);
 }
 
@@ -34,7 +35,7 @@ interface Redemption {
 }
 
 io.on('redemption', (data: Redemption) => {
-    console.log('redemption', data);
+    logger.info('Received channel point redemption:', data);
 
     // If channel is a bot "client", announce redemption
     if (chatbotChannels.includes(data.broadcaster)) {
@@ -43,5 +44,5 @@ io.on('redemption', (data: Redemption) => {
 });
 
 io.on('message', (msg: string) => {
-    console.log('message: ' + msg);
+    logger.info('Received Socket.IO message:', msg);
 });
