@@ -1,18 +1,18 @@
 import * as socketio from 'socket.io-client';
 import * as tmi from 'tmi.js';
-import { appConfig } from './config';
+import Config from './config';
 
-console.log('Connecting to socket.io server', appConfig.SOCKETIO_SERVER_ADDR);
-const io = socketio.default(appConfig.SOCKETIO_SERVER_ADDR);
+console.log('Connecting to socket.io server', Config.SOCKETIO_SERVER_ADDR);
+const io = socketio.default(Config.SOCKETIO_SERVER_ADDR);
 
-const chatbotChannels = appConfig.CHATBOT_CHANNELS.split(' ');
+const chatbotChannels = Config.CHATBOT_CHANNELS.split(' ');
 
 const client = new tmi.Client({
     options: { debug: true },
     connection: { reconnect: true },
     identity: {
         username: '0xqwerty',
-        password: `oauth:${appConfig.CHATBOT_OAUTH_TOKEN}`
+        password: `oauth:${Config.CHATBOT_OAUTH_TOKEN}`
     },
     channels: chatbotChannels.slice()
 });

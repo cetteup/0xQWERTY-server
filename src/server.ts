@@ -4,7 +4,7 @@ import * as socketio from 'socket.io';
 import * as boom from '@hapi/boom';
 import * as axios from 'axios';
 import { verifyEventSubSignature, setupEventsubSubscriptions } from './utilities';
-import { appConfig } from './config';
+import Config from './config';
 
 const app = express.default();
 
@@ -18,8 +18,8 @@ const observedTwitchEventsubIds: Array<string> = [];
 const aclient = axios.default.create({
     timeout: 2000,
     headers: {
-        'Client-Id': appConfig.CLIENT_ID,
-        'Authorization': `Bearer ${appConfig.APP_ACCESS_TOKEN}`
+        'Client-Id': Config.CLIENT_ID,
+        'Authorization': `Bearer ${Config.APP_ACCESS_TOKEN}`
     }
 });
 
@@ -77,6 +77,6 @@ io.on('connect', (socket: socketio.Socket) => {
     });
 });
 
-server.listen(appConfig.LISTEN_PORT, () => {
-    console.log(`Socket.IO server running at http://localhost:${appConfig.LISTEN_PORT}/`);
+server.listen(Config.LISTEN_PORT, () => {
+    console.log(`Socket.IO server running at http://localhost:${Config.LISTEN_PORT}/`);
 });

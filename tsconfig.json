@@ -5,12 +5,7 @@
         "sourceMap": true,
         "typeRoots": [
             "node_modules/@types"
-        ]
-    },
-    "files": [
-        "src/bot.ts",
-        "src/server.ts",
-        "src/utilities.ts",
-        "modules.d.ts"
-    ]
+        ],
+        "moduleResolution": "node"
+    }
 }
