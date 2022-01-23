@@ -9,7 +9,6 @@ const io = socketio.default(Config.SOCKETIO_SERVER_ADDR);
 const chatbotChannels = Config.CHATBOT_CHANNELS.split(' ');
 
 const client = new tmi.Client({
-    options: { debug: true },
     connection: { reconnect: true },
     identity: {
         username: '0xqwerty',
