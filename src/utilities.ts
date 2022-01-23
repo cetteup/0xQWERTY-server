@@ -2,13 +2,13 @@ import * as express from 'express';
 import * as boom from '@hapi/boom';
 import * as axios from 'axios';
 import * as crypto from 'crypto';
-import { appConfig } from './config';
+import Config from './config';
 
 const verifyEventSubSignature = (req: express.Request, res: express.Response, buf: Buffer, encoding: BufferEncoding) => {
     // Deconstruct signature header into algorith and signature
     const [algoritm, signature] = String(req.headers['twitch-eventsub-message-signature']).split('=', 2);
     // Init hmac using given algorithm and secret
-    const hmac = crypto.createHmac(algoritm, appConfig.EVENTSUB_SECRET);
+    const hmac = crypto.createHmac(algoritm, Config.EVENTSUB_SECRET);
     // Get remaining relevant headers
     const messageId = String(req.headers['twitch-eventsub-message-id']);
     const messageTimestamp = String(req.headers['twitch-eventsub-message-timestamp']);
@@ -68,8 +68,8 @@ const setupEventsubSubscriptions = async (aclient: axios.AxiosInstance, broadcas
             },
             transport: {
                 method: 'webhook',
-                callback: `${appConfig.SELF_BASE_URI}/webhooks/eventsub-callback`,
-                secret: appConfig.EVENTSUB_SECRET
+                callback: `${Config.SELF_BASE_URI}/webhooks/eventsub-callback`,
+                secret: Config.EVENTSUB_SECRET
             }
         };
 
