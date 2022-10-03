@@ -1,0 +1,29 @@
+version: "3.7"
+services:
+  server:
+    build: .
+    restart: unless-stopped
+
+    command: ["node", "dist/server.js"]
+
+    ports:
+      - "8080:8080"
+    environment:
+      - LOG_LEVEL=info
+      - APP_ACCESS_TOKEN=your_app_access_token
+      - EVENTSUB_SECRET=random_string_secret_to_validate_eventsub_signatures
+
+  bot:
+    build: .
+    restart: unless-stopped
+
+    command: ["./wait-for-it.sh", "server:8080", "--timeout=60", "--", "node", "dist/bot.js" ]
+
+    environment:
+      - LOG_LEVEL=info
+      - SOCKETIO_SERVER_ADDR=server:8080
+      - CHATBOT_OAUTH_TOKEN=your_bot_oauth_token
+      - CHATBOT_CHANNELS=comma_separated_list_of_channel_the_bot_should_join
+
+    depends_on:
+      - server

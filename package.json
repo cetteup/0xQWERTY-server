@@ -8,12 +8,10 @@
   },
   "scripts": {
     "build-ts": "tsc -b",
-    "postinstall": "npm run build-ts",
-    "start": "npm run serve",
-    "serve": "node dist/server.js",
-    "watch-node": "nodemon dist/server.js",
+    "start-server": "node dist/server.js",
+    "start-bot": "node dist/bot.js",
     "watch-ts": "tsc -w",
-    "test": "npx eslint \"src/**\" --fix"
+    "lint": "npx eslint \"src/**\" --fix"
   },
   "repository": {
     "type": "git",
