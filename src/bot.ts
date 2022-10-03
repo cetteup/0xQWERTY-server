@@ -21,7 +21,7 @@ client.connect();
 
 // Join all channels we are supposed to annouce redemptions on
 for (const channel of chatbotChannels) {
-    logger.info(`Joining Twitch chat of channel:`, channel);
+    logger.info('Joining Twitch chat of channel:', channel);
     io.emit('join', `streamer:${channel}`);
 }
 
