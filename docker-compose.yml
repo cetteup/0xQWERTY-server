@@ -10,6 +10,7 @@ services:
       - "8080:8080"
     environment:
       - LOG_LEVEL=info
+      - CLIENT_ID=your_app_client_id
       - APP_ACCESS_TOKEN=your_app_access_token
       - EVENTSUB_SECRET=random_string_secret_to_validate_eventsub_signatures
 
@@ -23,7 +24,7 @@ services:
       - LOG_LEVEL=info
       - SOCKETIO_SERVER_ADDR=server:8080
       - CHATBOT_OAUTH_TOKEN=your_bot_oauth_token
-      - CHATBOT_CHANNELS=comma_separated_list_of_channel_the_bot_should_join
+      - CHATBOT_CHANNELS=space_separated_list_of_channel_the_bot_should_join
 
     depends_on:
       - server
