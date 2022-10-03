@@ -18,7 +18,7 @@ services:
     build: .
     restart: unless-stopped
 
-    command: ["./wait-for-it.sh", "server:8080", "--timeout=60", "--", "node", "dist/bot.js" ]
+    command: ["./wait-for-it.sh", "api:8080", "--timeout=60", "--", "node", "dist/bot.js" ]
 
     environment:
       - LOG_LEVEL=info
