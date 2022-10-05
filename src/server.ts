@@ -6,7 +6,7 @@ import { customAlphabet } from 'nanoid';
 import * as socketio from 'socket.io';
 import Config from './config';
 import { asyncLocalStorage, logger } from './logger';
-import { setupEventsubSubscriptions, verifyEventSubSignature } from './utilities';
+import { setupEventsubSubscriptions, verifyEventSubSignature } from './utility';
 
 const app = express.default();
 
