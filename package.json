@@ -39,7 +39,7 @@
     "@types/hapi": "18.0.7",
     "@types/socket.io": "3.0.1",
     "@types/socket.io-client": "1.4.36",
-    "@types/tmi.js": "1.8.1",
+    "@types/tmi.js": "1.8.2",
     "@types/ws": "8.5.3",
     "@typescript-eslint/eslint-plugin": "5.40.1",
     "@typescript-eslint/parser": "5.40.1",
