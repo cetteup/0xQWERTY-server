@@ -23,7 +23,8 @@ services:
     environment:
       - LOG_LEVEL=info
       - SOCKETIO_SERVER_ADDR=http://api:8080
-      - CHATBOT_OAUTH_TOKEN=your_bot_oauth_token
+      - CLIENT_ID=your_app_client_id
+      - CHATBOT_ACCESS_TOKEN=your_bot_oauth_token
       - CHATBOT_CHANNELS=space_separated_list_of_channel_the_bot_should_join
 
     depends_on:
