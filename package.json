@@ -4,7 +4,7 @@
   "description": "Server for Twitch viewer keyboard",
   "main": "dist/server.js",
   "engines": {
-    "node": "16.x"
+    "node": "16.18.1"
   },
   "scripts": {
     "build-ts": "tsc -b",
@@ -24,14 +24,14 @@
   },
   "homepage": "https://github.com/cetteup/qwerty-server#readme",
   "dependencies": {
-    "@hapi/boom": "^10.0.0",
-    "axios": "^0.27.0",
-    "express": "^4.17.1",
-    "nanoid": "^3.2.0",
+    "@hapi/boom": "10.0.0",
+    "axios": "0.27.2",
+    "express": "4.17.1",
+    "nanoid": "3.2.0",
     "socket.io": "^4.0.0",
     "socket.io-client": "^4.0.0",
-    "tmi.js": "^1.7.1",
-    "tslog": "^3.3.1"
+    "tmi.js": "1.8.5",
+    "tslog": "3.3.1"
   },
   "devDependencies": {
     "@tsconfig/recommended": "1.0.1",
