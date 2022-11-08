@@ -68,7 +68,13 @@ type TwitchTokenResponse = {
 
 async function getClientPassword(): Promise<string> {
     // Return current access token if refresh is not possible or access token is still valid
-    if (!Config.CLIENT_SECRET || !oauthTokens.refresh || await isAccessTokenValid(oauthTokens.access)) {
+    if (!Config.CLIENT_SECRET || !oauthTokens.refresh) {
+        logger.debug('Chatbot token refresh is not available, continuing with initially configured access token');
+        return formatOAuthPassword(oauthTokens.access);
+    }
+
+    if (await isAccessTokenValid(oauthTokens.access)) {
+        logger.debug('Chatbot access token is still valid, continuing with current access token');
         return formatOAuthPassword(oauthTokens.access);
     }
 
