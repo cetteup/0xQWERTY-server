@@ -18,7 +18,7 @@ const twitchBodyParser = express.json({ verify: verifyEventSubSignature });
 const observedTwitchEventsubIds: Array<string> = [];
 
 const aclient = axios.default.create({
-    timeout: 2000,
+    timeout: Config.REQUEST_TIMEOUT,
     headers: {
         'Client-Id': Config.CLIENT_ID,
         'Authorization': `Bearer ${Config.APP_ACCESS_TOKEN}`

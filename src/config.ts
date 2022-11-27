@@ -10,4 +10,5 @@ export default abstract class Config {
     static readonly CHATBOT_ACCESS_TOKEN: string = process.env.CHATBOT_ACCESS_TOKEN || '';
     static readonly CHATBOT_REFRESH_TOKEN?: string = process.env.CHATBOT_REFRESH_TOKEN;
     static readonly CHATBOT_CHANNELS: string = process.env.CHATBOT_CHANNELS || '';
+    static readonly REQUEST_TIMEOUT: number = Number(process.env.REQUEST_TIMEOUT) || 4000;
 }
