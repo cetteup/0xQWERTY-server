@@ -79,9 +79,10 @@ app.use((err: boom.Boom, req: express.Request, res: express.Response, next: expr
 // TODO: Add async function to retrieve manageable 
 
 io.on('connect', (socket: socketio.Socket) => {
-    logger.info('Socket connected');
+    logger.info('Socket', socket.id, 'connected');
 
     socket.on('join', (room) => {
+        logger.info('Socket', socket.id, 'joined', room);
         socket.join(room);
         socket.send(`You joined ${room}`);
     });
