@@ -4,7 +4,7 @@
   "description": "Server for Twitch viewer keyboard",
   "main": "dist/server.js",
   "engines": {
-    "node": "16.19.0"
+    "node": "18.12.1"
   },
   "scripts": {
     "build-ts": "tsc -b",
