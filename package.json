@@ -1,7 +1,7 @@
 {
   "name": "qwerty-server",
   "version": "1.0.2",
-  "description": "Server for Twitch viewer keyboard",
+  "description": "Backend for 0xQWERTY-client and chat bot announcing channel point reward redemptions",
   "main": "dist/server.js",
   "engines": {
     "node": "18.12.1"
