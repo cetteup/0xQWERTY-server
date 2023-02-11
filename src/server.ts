@@ -1,5 +1,4 @@
 import * as boom from '@hapi/boom';
-import * as axios from 'axios';
 import * as express from 'express';
 import * as http from 'http';
 import { customAlphabet } from 'nanoid';
@@ -7,6 +6,8 @@ import * as socketio from 'socket.io';
 import Config from './config';
 import { asyncLocalStorage, logger } from './logger';
 import { setupEventsubSubscriptions, verifyEventSubSignature } from './utility';
+import { ClientCredentialsAuthProvider } from '@twurple/auth';
+import { ApiClient } from '@twurple/api';
 
 const app = express.default();
 
@@ -17,13 +18,8 @@ const twitchBodyParser = express.json({ verify: verifyEventSubSignature });
 
 const observedTwitchEventsubIds: Array<string> = [];
 
-const aclient = axios.default.create({
-    timeout: Config.REQUEST_TIMEOUT,
-    headers: {
-        'Client-Id': Config.CLIENT_ID,
-        'Authorization': `Bearer ${Config.APP_ACCESS_TOKEN}`
-    }
-});
+const authProvider = new ClientCredentialsAuthProvider(Config.CLIENT_ID, Config.CLIENT_SECRET);
+const apiClient = new ApiClient({ authProvider });
 
 // Set up request-based error logging
 app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -40,7 +36,7 @@ app.post('/client/eventsub-setup', express.json(), async (req: express.Request, 
     }
     else {
         try {
-            await setupEventsubSubscriptions(aclient, req.body.broadcaster_id, req.body.reward_ids);
+            await setupEventsubSubscriptions(apiClient, req.body.broadcaster_id, req.body.reward_ids);
             res.status(200).json({ message: 'Eventsub subscriptions are all set up' });
         }
         catch (e: any) {

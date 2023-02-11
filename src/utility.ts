@@ -1,9 +1,9 @@
 import * as boom from '@hapi/boom';
-import * as axios from 'axios';
 import * as crypto from 'crypto';
 import * as express from 'express';
 import Config from './config';
 import { logger } from './logger';
+import { ApiClient, HelixEventSubSubscription } from '@twurple/api';
 
 const verifyEventSubSignature = (req: express.Request, res: express.Response, buf: Buffer, encoding: BufferEncoding) => {
     // Deconstruct signature header into algorith and signature
@@ -27,54 +27,31 @@ const verifyEventSubSignature = (req: express.Request, res: express.Response, bu
     }
 };
 
-interface EventsubSubscription {
-    id: string,
-    status: string,
-    type: string,
-    version: string,
-    condition: {
-        broadcaster_user_id: string,
-        reward_id?: string
-    },
-    created_at: string,
-    transport: {
-        method: string,
-        callback: string
-    },
-    cost: number
-}
-
-const setupEventsubSubscriptions = async (aclient: axios.AxiosInstance, broadcasterId: string, rewardIds: Array<string>) => {
+const setupEventsubSubscriptions = async (apiClient: ApiClient, broadcasterId: string, rewardIds: Array<string>) => {
     // Get existing rewards
-    const response = await aclient.get('https://api.twitch.tv/helix/eventsub/subscriptions', {
-        params: {
-            status: 'enabled'
-        }
-    });
+    const response = await apiClient.eventSub.getSubscriptionsForStatus('enabled');
 
-    const existingRewards: Array<string> = response.data.data
-        .filter((eventsub: EventsubSubscription) => eventsub.condition.broadcaster_user_id == broadcasterId && eventsub.condition.reward_id)
-        .map((eventsub: EventsubSubscription) => eventsub.condition.reward_id);
+    const existingRewards: Array<string> = response.data
+        .filter((eventsub) => eventsub.condition.broadcaster_user_id == broadcasterId && eventsub.condition.reward_id)
+        .map((eventsub) => eventsub.condition.reward_id as string);
 
     const rewardsWithoutEventsub = rewardIds.filter((rewardId: string) => !existingRewards.includes(rewardId));
 
-    const pendingRequests: Array<Promise<axios.AxiosResponse>> = [];
+    const pendingRequests: Array<Promise<HelixEventSubSubscription>> = [];
     for (const rewardId of rewardsWithoutEventsub) {
-        const payload = {
-            type: 'channel.channel_points_custom_reward_redemption.add',
-            version: '1',
-            condition: {
+        pendingRequests.push(apiClient.eventSub.createSubscription(
+            'channel.channel_points_custom_reward_redemption.add',
+            '1',
+            {
                 broadcaster_user_id: broadcasterId,
                 reward_id: rewardId
             },
-            transport: {
+            {
                 method: 'webhook',
                 callback: `${Config.SELF_BASE_URI}/webhooks/eventsub-callback`,
                 secret: Config.EVENTSUB_SECRET
             }
-        };
-
-        pendingRequests.push(aclient.post('https://api.twitch.tv/helix/eventsub/subscriptions', payload));
+        ));
     }
 
     await Promise.all(pendingRequests);
