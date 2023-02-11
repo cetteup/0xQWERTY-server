@@ -1,6 +1,6 @@
 {
   "name": "qwerty-server",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Backend for 0xQWERTY-client and chat bot announcing channel point reward redemptions",
   "main": "dist/server.js",
   "engines": {
