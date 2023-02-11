@@ -22,8 +22,7 @@ const verifyEventSubSignature = (req: express.Request, res: express.Response, bu
     // Compare calculated hash to signature from header
     if (hash !== signature) {
         logger.error('Request signatur is invalid');
-        const err = boom.badRequest('Request signature is invalid');
-        throw err;
+        throw boom.badRequest('Request signature is invalid');
     }
 };
 
