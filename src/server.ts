@@ -6,7 +6,7 @@ import * as socketio from 'socket.io';
 import Config from './config';
 import { asyncLocalStorage, logger } from './logger';
 import { setupEventsubSubscriptions, verifyEventSubSignature } from './utility';
-import { ClientCredentialsAuthProvider } from '@twurple/auth';
+import { RefreshingAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
 
 const app = express.default();
@@ -18,7 +18,10 @@ const twitchBodyParser = express.json({ verify: verifyEventSubSignature });
 
 const observedTwitchEventsubIds: Array<string> = [];
 
-const authProvider = new ClientCredentialsAuthProvider(Config.CLIENT_ID, Config.CLIENT_SECRET);
+const authProvider = new RefreshingAuthProvider({
+    clientId: Config.CLIENT_ID,
+    clientSecret: Config.CLIENT_SECRET
+});
 const apiClient = new ApiClient({ authProvider });
 
 // Set up request-based error logging
