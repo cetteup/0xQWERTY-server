@@ -5,7 +5,7 @@ import Config from './config';
 import { logger } from './logger';
 import { ApiClient, HelixEventSubSubscription } from '@twurple/api';
 
-const verifyEventSubSignature = (req: express.Request, res: express.Response, buf: Buffer, encoding: BufferEncoding) => {
+export const verifyEventSubSignature = (req: express.Request, res: express.Response, buf: Buffer, encoding: BufferEncoding) => {
     // Deconstruct signature header into algorith and signature
     const [algoritm, signature] = String(req.headers['twitch-eventsub-message-signature']).split('=', 2);
     // Init hmac using given algorithm and secret
@@ -26,7 +26,7 @@ const verifyEventSubSignature = (req: express.Request, res: express.Response, bu
     }
 };
 
-const setupEventsubSubscriptions = async (apiClient: ApiClient, broadcasterId: string, rewardIds: Array<string>) => {
+export const setupEventsubSubscriptions = async (apiClient: ApiClient, broadcasterId: string, rewardIds: Array<string>) => {
     // Get existing rewards
     const response = await apiClient.eventSub.getSubscriptionsForStatus('enabled');
 
@@ -55,5 +55,3 @@ const setupEventsubSubscriptions = async (apiClient: ApiClient, broadcasterId: s
 
     await Promise.all(pendingRequests);
 };
-
-export { verifyEventSubSignature, setupEventsubSubscriptions };
