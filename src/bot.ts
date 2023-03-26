@@ -1,41 +1,8 @@
 import * as socketio from 'socket.io-client';
-import * as tmi from 'tmi.js';
 import Config from './config';
 import { logger } from './logger';
-import axios from 'axios';
-
-logger.info('Connecting to socket.io server:', Config.SOCKETIO_SERVER_ADDR);
-const io = socketio.default(Config.SOCKETIO_SERVER_ADDR);
-
-const chatbotChannels = Config.CHATBOT_CHANNELS.split(' ');
-const oauthTokens: {
-    access: string
-    refresh?: string
-} = {
-    access: Config.CHATBOT_ACCESS_TOKEN,
-    refresh: Config.CHATBOT_REFRESH_TOKEN
-};
-
-const client = new tmi.Client({
-    connection: { reconnect: true },
-    identity: {
-        username: '0xqwerty',
-        password: getClientPassword
-    },
-    channels: chatbotChannels.slice(),
-    options: {
-        messagesLogLevel: 'debug'
-    },
-    logger: logger.getChildLogger({ name: 'tmiLogger' })
-});
-
-client.connect();
-
-// Join all channels we are supposed to announce redemptions on
-for (const channel of chatbotChannels) {
-    logger.info('Joining redemption announcement room for:', channel);
-    io.emit('join', `streamer:${channel}`);
-}
+import { ChatClient } from '@twurple/chat';
+import { RefreshingAuthProvider } from '@twurple/auth';
 
 interface Redemption {
     id: string;
@@ -45,82 +12,69 @@ interface Redemption {
     redeemed_by: string;
 }
 
-io.on('redemption', (data: Redemption) => {
-    logger.info('Received channel point redemption:', data);
-
-    // If channel is a bot "client", announce redemption
-    if (chatbotChannels.includes(data.broadcaster)) {
-        client.say(data.broadcaster, `@${data.redeemed_by} redeemed: ${data.reward_title}`);
+(async () => {
+    logger.info('Connecting to socket.io server:', Config.SOCKETIO_SERVER_ADDR);
+    let io: SocketIOClient.Socket;
+    try {
+        io = socketio.default(Config.SOCKETIO_SERVER_ADDR);
     }
-});
-
-io.on('message', (msg: string) => {
-    logger.info('Received Socket.IO message:', msg);
-});
-
-type TwitchTokenResponse = {
-    access_token: string
-    expires_in: number
-    refresh_token: string
-    scope: string[]
-    token_type: string
-}
-
-async function getClientPassword(): Promise<string> {
-    // Return current access token if refresh is not possible or access token is still valid
-    if (!Config.CLIENT_SECRET || !oauthTokens.refresh) {
-        logger.debug('Chatbot token refresh is not available, continuing with initially configured access token');
-        return formatOAuthPassword(oauthTokens.access);
+    catch (e: unknown) {
+        logger.fatal(`Failed to connect to socket.io server ${e}`, );
+        process.exit(1);
     }
 
-    if (await isAccessTokenValid(oauthTokens.access)) {
-        logger.debug('Chatbot access token is still valid, continuing with current access token');
-        return formatOAuthPassword(oauthTokens.access);
-    }
+    const chatbotChannels = Config.CHATBOT_CHANNELS.split(' ');
 
-    const params = new URLSearchParams({
-        client_id: Config.CLIENT_ID,
-        client_secret: Config.CLIENT_SECRET,
-        grant_type: 'refresh_token',
-        refresh_token: oauthTokens.refresh
+    const authProvider = new RefreshingAuthProvider({
+        clientId: Config.CLIENT_ID,
+        clientSecret: Config.CLIENT_SECRET,
     });
 
     try {
-        const resp = await axios.post('https://id.twitch.tv/oauth2/token', params, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        });
-        const data: TwitchTokenResponse = resp.data;
-        oauthTokens.access = data.access_token;
-        oauthTokens.refresh = data.refresh_token;
-        logger.debug('Successfully refreshed chatbot access token');
+        await authProvider.addUserForToken({
+            expiresIn: null, obtainmentTimestamp: 0, scope: ['chat:read', 'chat:edit'],
+            accessToken: Config.CHATBOT_ACCESS_TOKEN,
+            refreshToken: Config.CHATBOT_REFRESH_TOKEN ?? null
+        }, ['chat']);
     }
-    catch (e: any) {
-        logger.error('Failed to refresh chatbot access token:', e.message);
+    catch (e: unknown) {
+        logger.fatal(`Failed to configure auth provider with user: ${e}`,);
+        process.exit(1);
     }
 
-    // We can't really handle any errors during the refresh (e.g. Twitch offline, refresh token invalid),
-    // so just return the current access token (refreshed or not)
-    return formatOAuthPassword(oauthTokens.access);
-}
+    const client = new ChatClient({
+        channels: chatbotChannels.slice(),
+        logger: {
+            custom: logger.getChildLogger({name: 'ChatClientLogger'})
+        },
+        authProvider
+    });
 
-export async function isAccessTokenValid(accessToken: string): Promise<boolean> {
+
     try {
-        await axios.get('https://api.twitch.tv/helix/users', {
-            headers: {
-                'Client-Id': Config.CLIENT_ID,
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-        return true;
+        await client.connect();
     }
-    catch (e) {
-        return false;
+    catch (e: unknown) {
+        logger.fatal(`Failed to connect to Twitch chat: ${e}`);
+        process.exit(1);
     }
-}
 
-export function formatOAuthPassword(accessToken: string) {
-    return `oauth:${accessToken}`;
-}
+    // Join all channels we are supposed to announce redemptions on
+    for (const channel of chatbotChannels) {
+        logger.info('Joining redemption announcement room for:', channel);
+        io.emit('join', `streamer:${channel}`);
+    }
 
+    io.on('redemption', (data: Redemption) => {
+        logger.info('Received channel point redemption:', data);
+
+        // If channel is a bot "client", announce redemption
+        if (chatbotChannels.includes(data.broadcaster)) {
+            client.say(data.broadcaster, `@${data.redeemed_by} redeemed: ${data.reward_title}`);
+        }
+    });
+
+    io.on('message', (msg: string) => {
+        logger.info('Received Socket.IO message:', msg);
+    });
+})();
