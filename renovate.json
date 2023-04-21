@@ -3,7 +3,7 @@
   "packageRules": [
     {
       "matchPackagePatterns": ["^@twurple"],
-      "groupName": "twurple"
+      "groupName": "twurple monorepo"
     }
   ],
   "extends": [
