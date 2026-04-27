@@ -30,7 +30,7 @@
     "@twurple/chat": "6.0.9",
     "express": "4.18.2",
     "nanoid": "3.3.8",
-    "socket.io": "4.6.1",
+    "socket.io": "4.6.2",
     "socket.io-client": "4.8.1",
     "tslog": "3.3.4"
   },
