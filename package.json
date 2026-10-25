@@ -40,7 +40,7 @@
     "@types/hapi": "18.0.15",
     "@types/socket.io": "3.0.2",
     "@types/socket.io-client": "1.4.36",
-    "@types/ws": "8.18.1",
+    "@types/ws": "8.18.2",
     "@typescript-eslint/eslint-plugin": "5.62.0",
     "@typescript-eslint/parser": "5.62.0",
     "eslint": "8.57.1",
